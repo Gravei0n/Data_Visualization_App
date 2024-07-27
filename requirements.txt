@@ -4,6 +4,7 @@ plotly
 seaborn
 matplotlib
 folium
+streamlit-folium
 wordcloud
 openpyxl
 
