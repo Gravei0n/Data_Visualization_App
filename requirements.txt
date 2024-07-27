@@ -1,5 +1,9 @@
 streamlit
 pandas
-matplotlib
+plotly
 seaborn
+matplotlib
+folium
+wordcloud
 openpyxl
+
