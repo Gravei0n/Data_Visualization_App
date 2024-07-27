@@ -403,11 +403,11 @@ st.write("Upload your data to generate relevant visualizations.")
 
 # Sidebar for chart information
 st.sidebar.header("Chart Information")
-selected_chart_info = st.sidebar.selectbox("Select Chart Type", list(chart_details.keys()))
+selected_chart_info = st.sidebar.selectbox("Select Chart Type", list(chart_details.keys()), key="chart_info")
 display_chart_info(selected_chart_info)
 
 # File uploader
-uploaded_file = st.file_uploader("Choose a file", type=["csv", "xlsx"])
+uploaded_file = st.file_uploader("Choose a file", type=["csv", "xlsx"], key="file_uploader")
 if uploaded_file is not None:
     try:
         with st.spinner('Loading data...'):
@@ -419,7 +419,7 @@ if uploaded_file is not None:
                                                         "Violin Plot", "Donut Chart", "Waterfall Chart", "Gantt Chart", 
                                                         "Map Visualization", "Sankey Diagram", "Radar Chart", "Sunburst Chart", 
                                                         "Bullet Chart", "Bubble Map", "Network Diagram", "Chord Diagram", 
-                                                        "Timeline", "Word Cloud"])
+                                                        "Timeline", "Word Cloud"], key="main_chart_type")
         
         generate_visualizations(df, chart_type)
     
