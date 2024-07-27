@@ -10,6 +10,15 @@ from wordcloud import WordCloud
 from io import StringIO
 import time
 
+# Custom CSS for pointer cursor on select boxes
+st.markdown("""
+    <style>
+    .stSelectbox {
+        cursor: pointer;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
 # Function to display information about different charts
 def chart_info():
     st.sidebar.header("Chart Information")
@@ -328,4 +337,3 @@ if uploaded_file is not None:
     
     except Exception as e:
         st.error(f"Error: {e}")
-
