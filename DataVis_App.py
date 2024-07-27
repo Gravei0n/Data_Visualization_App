@@ -7,6 +7,8 @@ import folium
 from streamlit_folium import folium_static
 import plotly.graph_objects as go
 from wordcloud import WordCloud
+from io import StringIO
+import time
 
 # Function to display information about different charts
 def chart_info():
@@ -84,98 +86,98 @@ def chart_info():
     st.sidebar.write("Visual representation of text data where the size of each word indicates its frequency or importance.")
 
 # Function to generate visualizations
-def generate_visualizations(df):
+@st.cache_data
+def load_data(uploaded_file):
+    if uploaded_file.name.endswith(".csv"):
+        return pd.read_csv(uploaded_file)
+    elif uploaded_file.name.endswith(".xlsx"):
+        return pd.read_excel(uploaded_file)
+
+def generate_visualizations(df, chart_type):
     st.write("## Generated Visualizations")
 
     if st.checkbox("Show DataFrame"):
         st.write(df)
 
-    chart_type = st.selectbox("Select Chart Type", ["Bar Chart", "Line Chart", "Pie Chart", "Histogram", "Scatter Plot",
-                                                    "Bubble Chart", "Area Chart", "Heatmap", "Tree Map", "Box Plot", 
-                                                    "Violin Plot", "Donut Chart", "Waterfall Chart", "Gantt Chart", 
-                                                    "Map Visualization", "Sankey Diagram", "Radar Chart", "Sunburst Chart", 
-                                                    "Bullet Chart", "Bubble Map", "Network Diagram", "Chord Diagram", 
-                                                    "Timeline", "Word Cloud"])
-
     columns = df.columns.tolist()
 
     if chart_type == "Bar Chart":
-        x_col = st.selectbox("Select X Column", columns)
-        y_col = st.selectbox("Select Y Column", columns)
+        x_col = st.selectbox("Select X Column", columns, key="bar_x")
+        y_col = st.selectbox("Select Y Column", columns, key="bar_y")
         fig = px.bar(df, x=x_col, y=y_col)
         st.plotly_chart(fig)
 
     elif chart_type == "Line Chart":
-        x_col = st.selectbox("Select X Column", columns)
-        y_col = st.selectbox("Select Y Column", columns)
+        x_col = st.selectbox("Select X Column", columns, key="line_x")
+        y_col = st.selectbox("Select Y Column", columns, key="line_y")
         fig = px.line(df, x=x_col, y=y_col)
         st.plotly_chart(fig)
 
     elif chart_type == "Pie Chart":
-        names_col = st.selectbox("Select Names Column", columns)
-        values_col = st.selectbox("Select Values Column", columns)
+        names_col = st.selectbox("Select Names Column", columns, key="pie_names")
+        values_col = st.selectbox("Select Values Column", columns, key="pie_values")
         fig = px.pie(df, names=names_col, values=values_col)
         st.plotly_chart(fig)
 
     elif chart_type == "Histogram":
-        x_col = st.selectbox("Select X Column", columns)
+        x_col = st.selectbox("Select X Column", columns, key="hist_x")
         fig = px.histogram(df, x=x_col)
         st.plotly_chart(fig)
 
     elif chart_type == "Scatter Plot":
-        x_col = st.selectbox("Select X Column", columns)
-        y_col = st.selectbox("Select Y Column", columns)
+        x_col = st.selectbox("Select X Column", columns, key="scatter_x")
+        y_col = st.selectbox("Select Y Column", columns, key="scatter_y")
         fig = px.scatter(df, x=x_col, y=y_col)
         st.plotly_chart(fig)
 
     elif chart_type == "Bubble Chart":
-        x_col = st.selectbox("Select X Column", columns)
-        y_col = st.selectbox("Select Y Column", columns)
-        size_col = st.selectbox("Select Size Column", columns)
+        x_col = st.selectbox("Select X Column", columns, key="bubble_x")
+        y_col = st.selectbox("Select Y Column", columns, key="bubble_y")
+        size_col = st.selectbox("Select Size Column", columns, key="bubble_size")
         fig = px.scatter(df, x=x_col, y=y_col, size=size_col)
         st.plotly_chart(fig)
 
     elif chart_type == "Area Chart":
-        x_col = st.selectbox("Select X Column", columns)
-        y_col = st.selectbox("Select Y Column", columns)
+        x_col = st.selectbox("Select X Column", columns, key="area_x")
+        y_col = st.selectbox("Select Y Column", columns, key="area_y")
         fig = px.area(df, x=x_col, y=y_col)
         st.plotly_chart(fig)
 
     elif chart_type == "Heatmap":
         st.write("Heatmap requires two categorical columns and one numerical column.")
-        x_col = st.selectbox("Select X Column", columns)
-        y_col = st.selectbox("Select Y Column", columns)
-        z_col = st.selectbox("Select Z Column", columns)
+        x_col = st.selectbox("Select X Column", columns, key="heatmap_x")
+        y_col = st.selectbox("Select Y Column", columns, key="heatmap_y")
+        z_col = st.selectbox("Select Z Column", columns, key="heatmap_z")
         fig = px.density_heatmap(df, x=x_col, y=y_col, z=z_col)
         st.plotly_chart(fig)
 
     elif chart_type == "Tree Map":
-        path_col = st.selectbox("Select Path Column", columns)
-        values_col = st.selectbox("Select Values Column", columns)
+        path_col = st.selectbox("Select Path Column", columns, key="tree_path")
+        values_col = st.selectbox("Select Values Column", columns, key="tree_values")
         fig = px.treemap(df, path=[path_col], values=values_col)
         st.plotly_chart(fig)
 
     elif chart_type == "Box Plot":
-        y_col = st.selectbox("Select Y Column", columns)
-        x_col = st.selectbox("Select X Column", columns)
+        y_col = st.selectbox("Select Y Column", columns, key="box_y")
+        x_col = st.selectbox("Select X Column", columns, key="box_x")
         fig = px.box(df, y=y_col, x=x_col)
         st.plotly_chart(fig)
 
     elif chart_type == "Violin Plot":
-        y_col = st.selectbox("Select Y Column", columns)
-        x_col = st.selectbox("Select X Column", columns)
+        y_col = st.selectbox("Select Y Column", columns, key="violin_y")
+        x_col = st.selectbox("Select X Column", columns, key="violin_x")
         fig = px.violin(df, y=y_col, x=x_col)
         st.plotly_chart(fig)
 
     elif chart_type == "Donut Chart":
-        names_col = st.selectbox("Select Names Column", columns)
-        values_col = st.selectbox("Select Values Column", columns)
+        names_col = st.selectbox("Select Names Column", columns, key="donut_names")
+        values_col = st.selectbox("Select Values Column", columns, key="donut_values")
         fig = px.pie(df, names=names_col, values=values_col, hole=0.3)
         st.plotly_chart(fig)
 
     elif chart_type == "Waterfall Chart":
-        x_col = st.selectbox("Select X Column", columns)
-        y_col = st.selectbox("Select Y Column", columns)
+        x_col = st.selectbox("Select X Column", columns, key="waterfall_x")
+        y_col = st.selectbox("Select Y Column", columns, key="waterfall_y")
         fig = go.Figure(go.Waterfall(
             x = df[x_col],
             y = df[y_col]
@@ -184,16 +186,16 @@ def generate_visualizations(df):
 
     elif chart_type == "Gantt Chart":
         st.write("Gantt Chart requires columns for task names, start and end dates.")
-        task_col = st.selectbox("Select Task Column", columns)
-        start_col = st.selectbox("Select Start Date Column", columns)
-        end_col = st.selectbox("Select End Date Column", columns)
+        task_col = st.selectbox("Select Task Column", columns, key="gantt_task")
+        start_col = st.selectbox("Select Start Date Column", columns, key="gantt_start")
+        end_col = st.selectbox("Select End Date Column", columns, key="gantt_end")
         fig = px.timeline(df, x_start=start_col, x_end=end_col, y=task_col)
         st.plotly_chart(fig)
 
     elif chart_type == "Map Visualization":
         st.write("Map Visualization requires columns for latitude and longitude.")
-        lat_col = st.selectbox("Select Latitude Column", columns)
-        lon_col = st.selectbox("Select Longitude Column", columns)
+        lat_col = st.selectbox("Select Latitude Column", columns, key="map_lat")
+        lon_col = st.selectbox("Select Longitude Column", columns, key="map_lon")
         map_df = df[[lat_col, lon_col]].dropna()
         map_center = [map_df[lat_col].mean(), map_df[lon_col].mean()]
         m = folium.Map(location=map_center, zoom_start=2)
@@ -203,9 +205,9 @@ def generate_visualizations(df):
 
     elif chart_type == "Sankey Diagram":
         st.write("Sankey Diagram requires columns for source, target, and value.")
-        source_col = st.selectbox("Select Source Column", columns)
-        target_col = st.selectbox("Select Target Column", columns)
-        value_col = st.selectbox("Select Value Column", columns)
+        source_col = st.selectbox("Select Source Column", columns, key="sankey_source")
+        target_col = st.selectbox("Select Target Column", columns, key="sankey_target")
+        value_col = st.selectbox("Select Value Column", columns, key="sankey_value")
         fig = go.Figure(go.Sankey(
             node=dict(
                 pad=15,
@@ -223,7 +225,7 @@ def generate_visualizations(df):
 
     elif chart_type == "Radar Chart":
         st.write("Radar Chart requires multiple numerical columns.")
-        num_cols = st.multiselect("Select Numerical Columns", columns)
+        num_cols = st.multiselect("Select Numerical Columns", columns, key="radar_cols")
         fig = go.Figure()
         for col in num_cols:
             fig.add_trace(go.Scatterpolar(r=df[col], theta=num_cols, fill='toself', name=col))
@@ -231,15 +233,15 @@ def generate_visualizations(df):
 
     elif chart_type == "Sunburst Chart":
         st.write("Sunburst Chart requires hierarchical path columns and a value column.")
-        path_cols = st.multiselect("Select Path Columns", columns)
-        values_col = st.selectbox("Select Values Column", columns)
+        path_cols = st.multiselect("Select Path Columns", columns, key="sunburst_path")
+        values_col = st.selectbox("Select Values Column", columns, key="sunburst_values")
         fig = px.sunburst(df, path=path_cols, values=values_col)
         st.plotly_chart(fig)
 
     elif chart_type == "Bullet Chart":
         st.write("Bullet Chart requires columns for measure and target.")
-        measure_col = st.selectbox("Select Measure Column", columns)
-        target_col = st.selectbox("Select Target Column", columns)
+        measure_col = st.selectbox("Select Measure Column", columns, key="bullet_measure")
+        target_col = st.selectbox("Select Target Column", columns, key="bullet_target")
         fig = go.Figure(go.Indicator(
             mode="number+gauge+delta", value=df[measure_col].mean(),
             delta={'reference': df[target_col].mean()},
@@ -248,17 +250,17 @@ def generate_visualizations(df):
 
     elif chart_type == "Bubble Map":
         st.write("Bubble Map requires columns for latitude, longitude, and size.")
-        lat_col = st.selectbox("Select Latitude Column", columns)
-        lon_col = st.selectbox("Select Longitude Column", columns)
-        size_col = st.selectbox("Select Size Column", columns)
+        lat_col = st.selectbox("Select Latitude Column", columns, key="bubblemap_lat")
+        lon_col = st.selectbox("Select Longitude Column", columns, key="bubblemap_lon")
+        size_col = st.selectbox("Select Size Column", columns, key="bubblemap_size")
         fig = px.scatter_geo(df, lat=lat_col, lon=lon_col, size=size_col)
         st.plotly_chart(fig)
 
     elif chart_type == "Network Diagram":
         st.write("Network Diagram requires columns for source, target, and weight.")
-        source_col = st.selectbox("Select Source Column", columns)
-        target_col = st.selectbox("Select Target Column", columns)
-        weight_col = st.selectbox("Select Weight Column", columns)
+        source_col = st.selectbox("Select Source Column", columns, key="network_source")
+        target_col = st.selectbox("Select Target Column", columns, key="network_target")
+        weight_col = st.selectbox("Select Weight Column", columns, key="network_weight")
         fig = go.Figure(go.Sankey(
             node=dict(
                 pad=15,
@@ -276,9 +278,9 @@ def generate_visualizations(df):
 
     elif chart_type == "Chord Diagram":
         st.write("Chord Diagram requires columns for source, target, and value.")
-        source_col = st.selectbox("Select Source Column", columns)
-        target_col = st.selectbox("Select Target Column", columns)
-        value_col = st.selectbox("Select Value Column", columns)
+        source_col = st.selectbox("Select Source Column", columns, key="chord_source")
+        target_col = st.selectbox("Select Target Column", columns, key="chord_target")
+        value_col = st.selectbox("Select Value Column", columns, key="chord_value")
         fig = go.Figure(go.Chord(
             df[source_col], df[target_col], df[value_col]
         ))
@@ -286,14 +288,14 @@ def generate_visualizations(df):
 
     elif chart_type == "Timeline":
         st.write("Timeline requires columns for events and dates.")
-        event_col = st.selectbox("Select Event Column", columns)
-        date_col = st.selectbox("Select Date Column", columns)
+        event_col = st.selectbox("Select Event Column", columns, key="timeline_event")
+        date_col = st.selectbox("Select Date Column", columns, key="timeline_date")
         fig = px.timeline(df, x_start=date_col, x_end=date_col, y=event_col)
         st.plotly_chart(fig)
 
     elif chart_type == "Word Cloud":
         st.write("Word Cloud requires a column for text data.")
-        text_col = st.selectbox("Select Text Column", columns)
+        text_col = st.selectbox("Select Text Column", columns, key="wordcloud_text")
         text = " ".join(df[text_col].dropna().astype(str))
         wordcloud = WordCloud().generate(text)
         plt.imshow(wordcloud, interpolation='bilinear')
@@ -311,12 +313,19 @@ chart_info()
 uploaded_file = st.file_uploader("Choose a file", type=["csv", "xlsx"])
 if uploaded_file is not None:
     try:
-        if uploaded_file.name.endswith(".csv"):
-            df = pd.read_csv(uploaded_file)
-        elif uploaded_file.name.endswith(".xlsx"):
-            df = pd.read_excel(uploaded_file)
+        with st.spinner('Loading data...'):
+            df = load_data(uploaded_file)
+        st.success('Data loaded successfully!')
         
-        generate_visualizations(df)
+        chart_type = st.selectbox("Select Chart Type", ["Bar Chart", "Line Chart", "Pie Chart", "Histogram", "Scatter Plot",
+                                                        "Bubble Chart", "Area Chart", "Heatmap", "Tree Map", "Box Plot", 
+                                                        "Violin Plot", "Donut Chart", "Waterfall Chart", "Gantt Chart", 
+                                                        "Map Visualization", "Sankey Diagram", "Radar Chart", "Sunburst Chart", 
+                                                        "Bullet Chart", "Bubble Map", "Network Diagram", "Chord Diagram", 
+                                                        "Timeline", "Word Cloud"])
+        
+        generate_visualizations(df, chart_type)
     
     except Exception as e:
         st.error(f"Error: {e}")
+
